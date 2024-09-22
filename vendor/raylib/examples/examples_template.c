@@ -35,23 +35,45 @@
     9. In case of additional information is required, just come to raylib Discord channel: example-contributions
 
     10. Have fun!
+
+    The following files should be updated when adding a new example, it's planned to create some
+    script to automatize this process but not available yet.
+
+     - raylib/examples/<category>/<category>_example_name.c
+     - raylib/examples/<category>/<category>_example_name.png
+     - raylib/examples/<category>/resources/*.*
+     - raylib/examples/Makefile
+     - raylib/examples/Makefile.Web
+     - raylib/examples/README.md
+     - raylib/projects/VS2022/examples/<category>_example_name.vcxproj
+     - raylib/projects/VS2022/raylib.sln
+     - raylib.com/common/examples.js
+     - raylib.com/examples/<category>/<category>_example_name.html
+     - raylib.com/examples/<category>/<category>_example_name.data
+     - raylib.com/examples/<category>/<category>_example_name.wasm
+     - raylib.com/examples/<category>/<category>_example_name.js
 */
 
 /*******************************************************************************************
 *
 *   raylib [core] example - Basic window
 *
-*   This example has been created using raylib 3.8 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   Example originally created with raylib 4.5, last time updated with raylib 4.5
 *
 *   Example contributed by <user_name> (@<user_github>) and reviewed by Ramon Santamaria (@raysan5)
 *
-*   Copyright (c) 2021 <user_name> (@<user_github>)
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2023 <user_name> (@<user_github>)
 *
 ********************************************************************************************/
 
 #include "raylib.h"
 
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 int main(void)
 {
     // Initialization

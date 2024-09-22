@@ -1,6 +1,6 @@
 /*******************************************************************************************
 *
-*   raylib [shaders] example - Apply a postprocessing shader and connect a custom uniform variable
+*   raylib [shaders] example - Postprocessing with custom uniform variable
 *
 *   NOTE: This example requires raylib OpenGL 3.3 or ES2 versions for shaders support,
 *         OpenGL 1.1 does not support shaders, recompile raylib to OpenGL 3.3 version.
@@ -9,10 +9,12 @@
 *         on OpenGL ES 2.0 platforms (Android, Raspberry Pi, HTML5), use #version 100 shaders
 *         raylib comes with shaders ready for both versions, check raylib/shaders install folder
 *
-*   This example has been created using raylib 1.3 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   Example originally created with raylib 1.3, last time updated with raylib 4.0
 *
-*   Copyright (c) 2015 Ramon Santamaria (@raysan5)
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2015-2023 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
@@ -20,10 +22,13 @@
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330
-#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+#else   // PLATFORM_ANDROID, PLATFORM_WEB
     #define GLSL_VERSION            100
 #endif
 
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 int main(void)
 {
     // Initialization
@@ -37,11 +42,11 @@ int main(void)
 
     // Define the camera to look into our 3d world
     Camera camera = { 0 };
-    camera.position = (Vector3){ 8.0f, 8.0f, 8.0f };
-    camera.target = (Vector3){ 0.0f, 1.5f, 0.0f };
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-    camera.fovy = 45.0f;
-    camera.projection = CAMERA_PERSPECTIVE;
+    camera.position = (Vector3){ 8.0f, 8.0f, 8.0f };    // Camera position
+    camera.target = (Vector3){ 0.0f, 1.5f, 0.0f };      // Camera looking at point
+    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
+    camera.fovy = 45.0f;                                // Camera field-of-view Y
+    camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
 
     Model model = LoadModel("resources/models/barracks.obj");                   // Load OBJ model
     Texture2D texture = LoadTexture("resources/models/barracks_diffuse.png");   // Load model texture (diffuse map)
@@ -62,9 +67,6 @@ int main(void)
     // Create a RenderTexture2D to be used for render to texture
     RenderTexture2D target = LoadRenderTexture(screenWidth, screenHeight);
 
-    // Setup orbital camera
-    SetCameraMode(camera, CAMERA_ORBITAL);  // Set an orbital camera mode
-
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
@@ -73,6 +75,8 @@ int main(void)
     {
         // Update
         //----------------------------------------------------------------------------------
+        UpdateCamera(&camera, CAMERA_ORBITAL);
+        
         Vector2 mousePosition = GetMousePosition();
 
         swirlCenter[0] = mousePosition.x;
@@ -80,8 +84,6 @@ int main(void)
 
         // Send new value to the shader to be used on drawing
         SetShaderValue(shader, swirlCenterLoc, swirlCenter, SHADER_UNIFORM_VEC2);
-
-        UpdateCamera(&camera);          // Update camera
         //----------------------------------------------------------------------------------
 
         // Draw

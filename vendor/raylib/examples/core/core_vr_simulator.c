@@ -2,10 +2,12 @@
 *
 *   raylib [core] example - VR Simulator (Oculus Rift CV1 parameters)
 *
-*   This example has been created using raylib 3.7 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   Example originally created with raylib 2.5, last time updated with raylib 4.0
 *
-*   Copyright (c) 2017-2021 Ramon Santamaria (@raysan5)
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2017-2023 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
@@ -13,10 +15,13 @@
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION        330
-#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+#else   // PLATFORM_ANDROID, PLATFORM_WEB
     #define GLSL_VERSION        100
 #endif
 
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 int main(void)
 {
     // Initialization
@@ -78,7 +83,11 @@ int main(void)
 
     // Initialize framebuffer for stereo rendering
     // NOTE: Screen size should match HMD aspect ratio
-    RenderTexture2D target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    RenderTexture2D target = LoadRenderTexture(device.hResolution, device.vResolution);
+
+    // The target's height is flipped (in the source Rectangle), due to OpenGL reasons
+    Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
+    Rectangle destRec = { 0.0f, 0.0f, (float)GetScreenWidth(), (float)GetScreenHeight() };
 
     // Define the camera to look into our 3d world
     Camera camera = { 0 };
@@ -86,11 +95,11 @@ int main(void)
     camera.target = (Vector3){ 0.0f, 2.0f, 0.0f };      // Camera looking at point
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector
     camera.fovy = 60.0f;                                // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;             // Camera type
+    camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
 
     Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
 
-    SetCameraMode(camera, CAMERA_FIRST_PERSON);         // Set first person camera mode
+    DisableCursor();                    // Limit cursor to relative movement inside the window
 
     SetTargetFPS(90);                   // Set our game to run at 90 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -100,7 +109,7 @@ int main(void)
     {
         // Update
         //----------------------------------------------------------------------------------
-        UpdateCamera(&camera);          // Update camera (simulator mode)
+        UpdateCamera(&camera, CAMERA_FIRST_PERSON);
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -121,8 +130,7 @@ int main(void)
         BeginDrawing();
             ClearBackground(RAYWHITE);
             BeginShaderMode(distortion);
-                DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width,
-                              (float)-target.texture.height }, (Vector2){ 0.0f, 0.0f }, WHITE);
+                DrawTexturePro(target.texture, sourceRec, destRec, (Vector2){ 0.0f, 0.0f }, 0.0f, WHITE);
             EndShaderMode();
             DrawFPS(10, 10);
         EndDrawing();

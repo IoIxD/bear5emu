@@ -5,10 +5,12 @@
 *   NOTE: This example requires raylib OpenGL 3.3 for shaders support and only #version 330
 *         is currently supported. OpenGL ES 2.0 platforms are not supported at the moment.
 *
-*   This example has been created using raylib 2.0 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   Example originally created with raylib 2.0, last time updated with raylib 4.2
 *
-*   Copyright (c) 2018 Ramon Santamaria (@raysan5)
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2018-2023 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
@@ -16,16 +18,19 @@
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330
-#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB -> Not supported at this moment
+#else   // PLATFORM_ANDROID, PLATFORM_WEB -> Not supported at this moment
     #define GLSL_VERSION            100
 #endif
 
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    int screenWidth = 800;
-    int screenHeight = 450;
+    const int screenWidth = 800;
+    const int screenHeight = 450;
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - raymarching shapes");
@@ -35,8 +40,7 @@ int main(void)
     camera.target = (Vector3){ 0.0f, 0.0f, 0.7f };      // Camera looking at point
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
     camera.fovy = 65.0f;                                // Camera field-of-view Y
-
-    SetCameraMode(camera, CAMERA_FREE);                 // Set camera mode
+    camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
 
     // Load raymarching shader
     // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
@@ -53,15 +57,16 @@ int main(void)
 
     float runTime = 0.0f;
 
-    SetTargetFPS(60);                       // Set our game to run at 60 frames-per-second
+    DisableCursor();                    // Limit cursor to relative movement inside the window
+    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose())            // Detect window close button or ESC key
+    while (!WindowShouldClose())        // Detect window close button or ESC key
     {
         // Update
         //----------------------------------------------------------------------------------
-        UpdateCamera(&camera);              // Update camera
+        UpdateCamera(&camera, CAMERA_FIRST_PERSON);
 
         float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
         float cameraTarget[3] = { camera.target.x, camera.target.y, camera.target.z };
@@ -77,9 +82,8 @@ int main(void)
         // Check if screen is resized
         if (IsWindowResized())
         {
-            screenWidth = GetScreenWidth();
-            screenHeight = GetScreenHeight();
-            float resolution[2] = { (float)screenWidth, (float)screenHeight };
+            resolution[0] = (float)GetScreenWidth();
+            resolution[1] = (float)GetScreenHeight();
             SetShaderValue(shader, resolutionLoc, resolution, SHADER_UNIFORM_VEC2);
         }
         //----------------------------------------------------------------------------------
@@ -93,10 +97,10 @@ int main(void)
             // We only draw a white full-screen rectangle,
             // frame is generated in shader using raymarching
             BeginShaderMode(shader);
-                DrawRectangle(0, 0, screenWidth, screenHeight, WHITE);
+                DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE);
             EndShaderMode();
 
-            DrawText("(c) Raymarching shader by Iñigo Quilez. MIT License.", screenWidth - 280, screenHeight - 20, 10, BLACK);
+            DrawText("(c) Raymarching shader by Iñigo Quilez. MIT License.", GetScreenWidth() - 280, GetScreenHeight() - 20, 10, BLACK);
 
         EndDrawing();
         //----------------------------------------------------------------------------------

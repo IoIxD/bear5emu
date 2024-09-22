@@ -337,7 +337,7 @@ endif
 ifeq ($(PLATFORM),PLATFORM_RPI)
     # Libraries for Raspberry Pi compiling
     # NOTE: Required packages: libasound2-dev (ALSA)
-    LDLIBS = -lraylib -lGLESv2 -lEGL -lpthread -lrt -lm -ldrm -lgbm -ldl
+    LDLIBS = -lraylib -lbrcmGLESv2 -lbrcmEGL -lpthread -lrt -lm -lbcm_host -ldl
 endif
 ifeq ($(PLATFORM),PLATFORM_WEB)
     # Libraries for web (HTML5) compiling
@@ -356,8 +356,7 @@ EXAMPLES = \
     scroll_panel/scroll_panel \
     style_selector/style_selector \
     custom_sliders/custom_sliders \
-    animation_curve/animation_curve \
-    floating_window/floating_window \
+    animation_curve/animation_curve
 
 CURRENT_MAKEFILE = $(lastword $(MAKEFILE_LIST))
 

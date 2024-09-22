@@ -2,12 +2,14 @@
 *
 *   raylib [models] example - Mesh picking in 3d mode, ground plane, triangle, mesh
 *
-*   This example has been created using raylib 1.7 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   Example originally created with raylib 1.7, last time updated with raylib 4.0
 *
 *   Example contributed by Joel Davis (@joeld42) and reviewed by Ramon Santamaria (@raysan5)
 *
-*   Copyright (c) 2017 Joel Davis (@joeld42) and Ramon Santamaria (@raysan5)
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2017-2023 Joel Davis (@joeld42) and Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
@@ -16,6 +18,9 @@
 
 #define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 int main(void)
 {
     // Initialization
@@ -31,7 +36,7 @@ int main(void)
     camera.target = (Vector3){ 0.0f, 8.0f, 0.0f };      // Camera looking at point
     camera.up = (Vector3){ 0.0f, 1.6f, 0.0f };          // Camera up vector (rotation towards target)
     camera.fovy = 45.0f;                                // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;             // Camera mode type
+    camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
 
     Ray ray = { 0 };        // Picking ray
 
@@ -59,8 +64,6 @@ int main(void)
     Vector3 sp = (Vector3){ -30.0f, 5.0f, 5.0f };
     float sr = 4.0f;
 
-    SetCameraMode(camera, CAMERA_FREE); // Set a free camera mode
-
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     // Main game loop
@@ -68,7 +71,14 @@ int main(void)
     {
         // Update
         //----------------------------------------------------------------------------------
-        UpdateCamera(&camera);          // Update camera
+        if (IsCursorHidden()) UpdateCamera(&camera, CAMERA_FIRST_PERSON);          // Update camera
+
+        // Toggle camera controls
+        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+        {
+            if (IsCursorHidden()) EnableCursor();
+            else DisableCursor();
+        }
 
         // Display information about closest hit
         RayCollision collision = { 0 };
@@ -121,9 +131,22 @@ int main(void)
             cursorColor = ORANGE;
             hitObjectName = "Box";
 
-            // Check ray collision against model
-            // NOTE: It considers model.transform matrix!
-            RayCollision meshHitInfo = GetRayCollisionModel(ray, tower);
+            // Check ray collision against model meshes
+            RayCollision meshHitInfo = { 0 };
+            for (int m = 0; m < tower.meshCount; m++)
+            {
+                // NOTE: We consider the model.transform for the collision check but 
+                // it can be checked against any transform Matrix, used when checking against same
+                // model drawn multiple times with multiple transforms
+                meshHitInfo = GetRayCollisionMesh(ray, tower.meshes[m], tower.transform);
+                if (meshHitInfo.hit)
+                {
+                    // Save the closest hit mesh
+                    if ((!collision.hit) || (collision.distance > meshHitInfo.distance)) collision = meshHitInfo;
+                    
+                    break;  // Stop once one mesh collision is detected, the colliding mesh is m
+                }
+            }
 
             if (meshHitInfo.hit)
             {
@@ -201,7 +224,7 @@ int main(void)
                     DrawText(TextFormat("Barycenter: %3.2f %3.2f %3.2f",  bary.x, bary.y, bary.z), 10, ypos + 45, 10, BLACK);
             }
 
-            DrawText("Use Mouse to Move Camera", 10, 430, 10, GRAY);
+            DrawText("Right click mouse to toggle camera controls", 10, 430, 10, GRAY);
 
             DrawText("(c) Turret 3D model by Alberto Cano", screenWidth - 200, screenHeight - 20, 10, GRAY);
 

@@ -2,16 +2,22 @@
 *
 *   raylib [shapes] example - collision area
 *
-*   This example has been created using raylib 2.5 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   Example originally created with raylib 2.5, last time updated with raylib 2.5
 *
-*   Copyright (c) 2013-2019 Ramon Santamaria (@raysan5)
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2013-2023 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
 #include "raylib.h"
-#include <stdlib.h>     // Required for abs()
 
+#include <stdlib.h>     // Required for: abs()
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 int main(void)
 {
     // Initialization
@@ -92,6 +98,9 @@ int main(void)
                 // Draw collision area
                 DrawText(TextFormat("Collision Area: %i", (int)boxCollision.width*(int)boxCollision.height), GetScreenWidth()/2 - 100, screenUpperLimit + 10, 20, BLACK);
             }
+
+            // Draw help instructions
+            DrawText("Press SPACE to PAUSE/RESUME", 20, screenHeight - 35, 20, LIGHTGRAY);
 
             DrawFPS(10, 10);
 

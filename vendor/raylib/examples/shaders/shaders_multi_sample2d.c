@@ -9,10 +9,12 @@
 *         on OpenGL ES 2.0 platforms (Android, Raspberry Pi, HTML5), use #version 100 shaders
 *         raylib comes with shaders ready for both versions, check raylib/shaders install folder
 *
-*   This example has been created using raylib 3.5 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   Example originally created with raylib 3.5, last time updated with raylib 3.5
 *
-*   Copyright (c) 2020 Ramon Santamaria (@raysan5)
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2020-2023 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
@@ -20,10 +22,13 @@
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330
-#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+#else   // PLATFORM_ANDROID, PLATFORM_WEB
     #define GLSL_VERSION            100
 #endif
 
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 int main(void)
 {
     // Initialization

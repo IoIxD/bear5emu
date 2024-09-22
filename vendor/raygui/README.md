@@ -4,7 +4,7 @@
 
 `raygui` was originally inspired by [Unity IMGUI](https://docs.unity3d.com/Manual/GUIScriptingGuide.html) (immediate mode GUI API).
 
-`raygui` was designed as an auxiliary module for [raylib](https://github.com/raysan5/raylib) to create simple GUI interfaces using raylib graphic style (simple colors, plain rectangular shapes, wide borders...) but it can be adapted to other engines/frameworks.
+`raygui` was designed as an auxiliar module for [raylib](https://github.com/raysan5/raylib) to create simple GUI interfaces using raylib graphic style (simple colors, plain rectangular shapes, wide borders...) but it can be adapted to other engines/frameworks.
 
 `raygui` is intended for **tools development**; it has already been used to develop [multiple published tools](https://raylibtech.itch.io).
 
@@ -25,52 +25,12 @@
  - **Icons support**, embedding a complete 1-bit icons pack
  - Multiple **tools** provided for raygui development
 
-## code sample
-```c
-#include "raylib.h"
-
-#define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
-
-int main()
-{
-    InitWindow(400, 200, "raygui - controls test suite");
-    SetTargetFPS(60);
-
-    bool showMessageBox = false;
-
-    while (!WindowShouldClose())
-    {
-        // Draw
-        //----------------------------------------------------------------------------------
-        BeginDrawing();
-            ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
-
-            if (GuiButton((Rectangle){ 24, 24, 120, 30 }, "#191#Show Message")) showMessageBox = true;
-
-            if (showMessageBox)
-            {
-                int result = GuiMessageBox((Rectangle){ 85, 70, 250, 100 },
-                    "#191#Message Box", "Hi! This is a message!", "Nice;Cool");
-
-                if (result >= 0) showMessageBox = false;
-            }
-
-        EndDrawing();
-    }
-
-    CloseWindow();
-    return 0;
-}
-```
-![screenshot000](https://github.com/raysan5/raygui/assets/5766837/170e2bce-b7ca-49dc-a263-32b673376546)
-
 ## raygui controls
 
 ### basic controls
 ```
 Label       |  Button      |  LabelButton |  Toggle      |  ToggleGroup  |  ToggleSlider
-CheckBox    |  ComboBox    |  DropdownBox |  TextBox     |  ValueBox     |  Spinner
+CheckBox    | ComboBox     |  DropdownBox |  TextBox     |  ValueBox     |  Spinner
 Slider      |  SliderBar   |  ProgressBar |  StatusBar   |  DummyRec     |  Grid
 ```
 ### container/separator controls
@@ -147,7 +107,6 @@ cl /O2 /I../raylib/src/ /D_USRDLL /D_WINDLL /DRAYGUI_IMPLEMENTATION /DBUILD_LIBT
 ```
 mv src/raygui.h src/raygui.c
 gcc -o raygui.so src/raygui.c -shared -fpic -DRAYGUI_IMPLEMENTATION -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
-mv src/raygui.c src/raygui.h
 ```
 
 - **Mac (clang, homebrew installed raylib)**

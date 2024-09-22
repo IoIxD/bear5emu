@@ -1,6 +1,18 @@
 cmake_minimum_required(VERSION 3.0)
 project(raylib)
 
+# Avoid excessive expansion of variables in conditionals. In particular, if
+# "PLATFORM" is "DRM" than:
+#
+# if (${PLATFORM} MATCHES "DRM")
+#
+# may expand e.g to:
+#
+# if (/usr/lib/aarch64-linux-gnu/libdrm.so MATCHES "DRM")
+#
+# See https://cmake.org/cmake/help/latest/policy/CMP0054.html
+cmake_policy(SET CMP0054 NEW)
+
 # Directory for easier includes
 # Anywhere you see include(...) you can check <root>/cmake for that file
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -24,6 +36,17 @@ include(BuildOptions)
 
 # Main sources directory (the second parameter sets the output directory name to raylib)
 add_subdirectory(src raylib)
+
+# Uninstall target
+if(NOT TARGET uninstall)
+  configure_file(
+    "${CMAKE_MODULE_PATH}/Uninstall.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+  add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
 
 if (${BUILD_EXAMPLES})
   MESSAGE(STATUS "Building examples is enabled")

@@ -15,9 +15,14 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # for actions/upload-release-asset to upload release asset
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -60,11 +65,11 @@ jobs:
         cd ../../../raylib
         # ${{ matrix.ARCH }}-linux-gnu-gcc -v
       
-    # TODO: Support 32bit (i386) shared library building
+    # TODO: Support 32bit (i386) static/shared library building
     - name: Build Library
       run: |
         cd src
-        make PLATFORM=PLATFORM_DESKTOP CC=gcc RAYLIB_LIBTYPE=STATIC RAYLIB_RELEASE_PATH="../build/${{ env.RELEASE_NAME }}/lib" CFLAGS="-m32" -B
+        make PLATFORM=PLATFORM_DESKTOP CC=gcc RAYLIB_LIBTYPE=STATIC RAYLIB_RELEASE_PATH="../build/${{ env.RELEASE_NAME }}/lib" CUSTOM_CFLAGS="-m32" -B
         # make PLATFORM=PLATFORM_DESKTOP CC=gcc RAYLIB_LIBTYPE=SHARED RAYLIB_RELEASE_PATH="../build/${{ env.RELEASE_NAME }}/lib" -B
         cd ..
       if: matrix.bits == 32
@@ -82,14 +87,14 @@ jobs:
         cp -v ./src/raylib.h ./build/${{ env.RELEASE_NAME }}/include
         cp -v ./src/raymath.h ./build/${{ env.RELEASE_NAME }}/include
         cp -v ./src/rlgl.h ./build/${{ env.RELEASE_NAME }}/include
-        cp -v ./src/extras/raygui.h ./build/${{ env.RELEASE_NAME }}/include
+        cp -v ./CHANGELOG ./build/${{ env.RELEASE_NAME }}/CHANGELOG
         cp -v ./README.md ./build/${{ env.RELEASE_NAME }}/README.md
         cp -v ./LICENSE ./build/${{ env.RELEASE_NAME }}/LICENSE
         cd build
         tar -czvf ${{ env.RELEASE_NAME }}.tar.gz ${{ env.RELEASE_NAME }}
         
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.RELEASE_NAME }}.tar.gz
         path: ./build/${{ env.RELEASE_NAME }}.tar.gz

@@ -1,11 +1,13 @@
 /*******************************************************************************************
 *
-*   raylib [core] example - 2d camera
+*   raylib [core] example - 2D Camera system
 *
-*   This example has been created using raylib 1.5 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   Example originally created with raylib 1.5, last time updated with raylib 3.0
 *
-*   Copyright (c) 2016 Ramon Santamaria (@raysan5)
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2016-2023 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
@@ -13,6 +15,9 @@
 
 #define MAX_BUILDINGS   100
 
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 int main(void)
 {
     // Initialization
@@ -54,7 +59,6 @@ int main(void)
     {
         // Update
         //----------------------------------------------------------------------------------
-
         // Player movement
         if (IsKeyDown(KEY_RIGHT)) player.x += 2;
         else if (IsKeyDown(KEY_LEFT)) player.x -= 2;

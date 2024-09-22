@@ -5,10 +5,12 @@
 *   NOTE: This example requires raylib OpenGL 3.3 for shaders support and only #version 330
 *         is currently supported. OpenGL ES 2.0 platforms are not supported at the moment.
 *
-*   This example has been created using raylib 3.0 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   Example originally created with raylib 3.0, last time updated with raylib 3.5
 *
-*   Copyright (c) 2020 Ramon Santamaria (@raysan5)
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2020-2023 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
@@ -19,21 +21,24 @@
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330
-#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+#else   // PLATFORM_ANDROID, PLATFORM_WEB
     #define GLSL_VERSION            100
 #endif
 
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    int screenWidth = 800;
-    int screenHeight = 450;
+    const int screenWidth = 800;
+    const int screenHeight = 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - hot reloading");
 
     const char *fragShaderFileName = "resources/shaders/glsl%i/reload.fs";
-    long fragShaderFileModTime = GetFileModTime(TextFormat(fragShaderFileName, GLSL_VERSION));
+    time_t fragShaderFileModTime = GetFileModTime(TextFormat(fragShaderFileName, GLSL_VERSION));
 
     // Load raymarching shader
     // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader

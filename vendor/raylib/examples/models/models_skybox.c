@@ -2,10 +2,12 @@
 *
 *   raylib [models] example - Skybox loading and drawing
 *
-*   This example has been created using raylib 3.5 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   Example originally created with raylib 1.8, last time updated with raylib 4.0
 *
-*   Copyright (c) 2017-2020 Ramon Santamaria (@raysan5)
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2017-2023 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
@@ -16,13 +18,16 @@
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330
-#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+#else   // PLATFORM_ANDROID, PLATFORM_WEB
     #define GLSL_VERSION            100
 #endif
 
 // Generate cubemap (6 faces) from equirectangular (panorama) texture
 static TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int size, int format);
 
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 int main(void)
 {
     // Initialization
@@ -33,7 +38,12 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "raylib [models] example - skybox loading and drawing");
 
     // Define the camera to look into our 3d world
-    Camera camera = { { 1.0f, 1.0f, 1.0f }, { 4.0f, 1.0f, 4.0f }, { 0.0f, 1.0f, 0.0f }, 45.0f, 0 };
+    Camera camera = { 0 };
+    camera.position = (Vector3){ 1.0f, 1.0f, 1.0f };    // Camera position
+    camera.target = (Vector3){ 4.0f, 1.0f, 4.0f };      // Camera looking at point
+    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
+    camera.fovy = 45.0f;                                // Camera field-of-view Y
+    camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
 
     // Load skybox model
     Mesh cube = GenMeshCube(1.0f, 1.0f, 1.0f);
@@ -58,14 +68,12 @@ int main(void)
 
     char skyboxFileName[256] = { 0 };
     
-    Texture2D panorama;
-
     if (useHDR)
     {
         TextCopy(skyboxFileName, "resources/dresden_square_2k.hdr");
 
         // Load HDR panorama (sphere) texture
-        panorama = LoadTexture(skyboxFileName);
+        Texture2D panorama = LoadTexture(skyboxFileName);
 
         // Generate cubemap (texture with 6 quads-cube-mapping) from panorama HDR texture
         // NOTE 1: New texture is generated rendering to texture, shader calculates the sphere->cube coordinates mapping
@@ -73,7 +81,7 @@ int main(void)
         // despite texture can be successfully created.. so using PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 instead of PIXELFORMAT_UNCOMPRESSED_R32G32B32A32
         skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(shdrCubemap, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 
-        //UnloadTexture(panorama);    // Texture not required anymore, cubemap already generated
+        UnloadTexture(panorama);        // Texture not required anymore, cubemap already generated
     }
     else
     {
@@ -82,50 +90,52 @@ int main(void)
         UnloadImage(img);
     }
 
-    SetCameraMode(camera, CAMERA_FIRST_PERSON);  // Set a first person camera mode
+    DisableCursor();                    // Limit cursor to relative movement inside the window
 
-    SetTargetFPS(60);                       // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose())            // Detect window close button or ESC key
+    while (!WindowShouldClose())        // Detect window close button or ESC key
     {
         // Update
         //----------------------------------------------------------------------------------
-        UpdateCamera(&camera);              // Update camera
+        UpdateCamera(&camera, CAMERA_FIRST_PERSON);
 
         // Load new cubemap texture on drag&drop
         if (IsFileDropped())
         {
-            int count = 0;
-            char **droppedFiles = GetDroppedFiles(&count);
+            FilePathList droppedFiles = LoadDroppedFiles();
 
-            if (count == 1)         // Only support one file dropped
+            if (droppedFiles.count == 1)         // Only support one file dropped
             {
-                if (IsFileExtension(droppedFiles[0], ".png;.jpg;.hdr;.bmp;.tga"))
+                if (IsFileExtension(droppedFiles.paths[0], ".png;.jpg;.hdr;.bmp;.tga"))
                 {
-                    // Unload current cubemap texture and load new one
+                    // Unload current cubemap texture to load new one
                     UnloadTexture(skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture);
+                    
                     if (useHDR)
                     {
-                        Texture2D panorama = LoadTexture(droppedFiles[0]);
+                        // Load HDR panorama (sphere) texture
+                        Texture2D panorama = LoadTexture(droppedFiles.paths[0]);
 
                         // Generate cubemap from panorama texture
                         skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(shdrCubemap, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-                        UnloadTexture(panorama);
+                        
+                        UnloadTexture(panorama);    // Texture not required anymore, cubemap already generated
                     }
                     else
                     {
-                        Image img = LoadImage(droppedFiles[0]);
+                        Image img = LoadImage(droppedFiles.paths[0]);
                         skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
                         UnloadImage(img);
                     }
 
-                    TextCopy(skyboxFileName, droppedFiles[0]);
+                    TextCopy(skyboxFileName, droppedFiles.paths[0]);
                 }
             }
 
-            ClearDroppedFiles();    // Clear internal buffers
+            UnloadDroppedFiles(droppedFiles);    // Unload filepaths from memory
         }
         //----------------------------------------------------------------------------------
 
