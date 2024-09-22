@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
+set(BUILD_SHARED_LIBS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(bear5emu
     LANGUAGES C CXX
@@ -34,6 +35,7 @@ target_link_libraries(bear5emu PUBLIC
     raylib
     ${CMAKE_DL_LIBS}
 )
+target_link_directories(bear5emu PRIVATE fceumm)
 target_include_directories(bear5emu PUBLIC
     ../vendor/raygui/src
     ../vendor/libretro-common/include
