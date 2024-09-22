@@ -1,4 +1,5 @@
 #include "gui_window_file_dialog.h"
+
 #include <string.h> // Required for: strcpy()
 
 //----------------------------------------------------------------------------------
@@ -46,9 +47,6 @@ static int GuiListViewFiles(Rectangle bounds, FileInfo *files, int count,
                             int *focus, int *scrollIndex, int active);
 #endif
 
-#if !defined(RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT)
-#define RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT 24
-#endif
 //----------------------------------------------------------------------------------
 // Module Functions Definition
 //----------------------------------------------------------------------------------
@@ -112,8 +110,7 @@ void GuiWindowFileDialog(GuiWindowFileDialogState *state) {
         if (CheckCollisionPointRec(
                 mousePosition,
                 (Rectangle){state->windowBounds.x, state->windowBounds.y,
-                            (float)state->windowBounds.width,
-                            RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT})) {
+                            (float)state->windowBounds.width, 32})) {
           state->dragMode = true;
           state->panOffset.x = mousePosition.x - state->windowBounds.x;
           state->panOffset.y = mousePosition.y - state->windowBounds.y;
