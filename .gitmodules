@@ -1,6 +1,7 @@
 [submodule "vendor/raylib"]
 	path = vendor/raylib
 	url = https://github.com/raysan5/raylib.git
+    branch = 4.0.0
 [submodule "vendor/raygui"]
 	path = vendor/raygui
 	url = https://github.com/raysan5/raygui.git
