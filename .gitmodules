@@ -1,0 +1,12 @@
+[submodule "vendor/libretro-common"]
+    path = vendor/libretro-common
+    url = https://github.com/libretro/libretro-common.git
+    ignore = dirty
+[submodule "vendor/raylib"]
+    path = vendor/raylib
+    url = https://github.com/raysan5/raylib.git
+    ignore = dirty
+[submodule "vendor/raygui"]
+	path = vendor/raygui
+	url = https://github.com/raysan5/raygui.git
+    ignore = dirty
