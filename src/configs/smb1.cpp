@@ -38,12 +38,25 @@ bool SMB1Config::Bear5CanAttack() {
 };
 int SMB1Config::Level() { return ((unsigned char *)GetSystemMemory())[0x0760]; }
 bool SMB1Config::Bear5AttackOverride() {
-  void *memory = GetSystemMemory();
-  bool hasLuigi = ((unsigned char *)memory)[0x077A] == 1;
-  unsigned char warp_zone_offset = ((unsigned char *)memory)[0x06D6];
-  bool enteredWarpZone = (warp_zone_offset != 0 && warp_zone_offset != 255);
-  return hasLuigi || enteredWarpZone;
+  /*void *memory = GetSystemMemory();
+  // bool hasLuigi = ((unsigned char *)memory)[0x077A] == 1;
+  unsigned char warp_zone_offset_1 = ((unsigned char *)memory)[0x87F2];
+  unsigned char warp_zone_offset_2 = ((unsigned char *)memory)[0x87F3];
+  unsigned char warp_zone_offset_3 = ((unsigned char *)memory)[0x87F4];
+  bool enteredWarpZone =
+      (warp_zone_offset_1 != 0 && warp_zone_offset_1 != 255 &&
+       warp_zone_offset_2 != 0 && warp_zone_offset_2 != 255 &&
+       warp_zone_offset_3 != 0 && warp_zone_offset_3 != 255);
+  return enteredWarpZone;*/
+  return false;
 };
 
 float SMB1Config::Speed() { return 2.0; }
+
+bool SMB1Config::Music() {
+  void *memory = GetSystemMemory();
+  // auto aboveGround = ((unsigned char *)memory)[0x0773] == 1;
+  return ((unsigned char *)memory)[0x0770] == 1 &&
+         ((unsigned char *)memory)[0x0772] == 3;
+}
 } // namespace configs

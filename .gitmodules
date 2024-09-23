@@ -5,6 +5,3 @@
 [submodule "vendor/raygui"]
 	path = vendor/raygui
 	url = https://github.com/raysan5/raygui.git
-[submodule "vendor/libretro-fceumm"]
-	path = vendor/libretro-fceumm
-	url = https://github.com/libretro/libretro-fceumm.git

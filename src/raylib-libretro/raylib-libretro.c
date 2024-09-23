@@ -1056,34 +1056,33 @@ int16_t LibretroInputState(unsigned port, unsigned device, unsigned index,
 }
 
 void LibretroAudioCallback(void *bufferData, unsigned int frames) {
-  if (LibretroCore.audioBuffer) {
+  /*if (LibretroCore.audioBuffer) {
     // TraceLog(LOG_INFO, "Frames: %i", frames);
     for (unsigned int i = 0; i < frames * 2; i += 2) {
       if (i < LibretroCore.audioFrames) {
-        ((float *)bufferData)[i] = (float)(LibretroCore.audioBuffer[i]);
-        ((float *)bufferData)[i + 1] = (float)(LibretroCore.audioBuffer[i + 1]);
+        for (unsigned int n = 0; n < LibretroCore.audioFrames; n++) {
+          ((float *)bufferData)[i] = (float)(LibretroCore.audioBuffer[i + n]);
+        }
       } else {
-        ((float *)bufferData)[i] = 0.0f;
-        ((float *)bufferData)[i + 1] = 0.0f;
       }
     }
-  }
+  }*/
 }
 
-size_t LibretroAudioWrite(const int16_t *data, size_t frames) {
-  if (data == NULL) {
-    return 0;
-  }
-  // UpdateAudioStream(LibretroCore.audioStream, data, frames);
-
-  // LibretroCore.audioBuffer = data;
-  // LibretroCore.audioFrames = frames;
-
-  //     // TODO: Fix Audio being choppy since it doesn't append to the buffer.
-  //     if (IsAudioStreamProcessed(LibretroCore.audioStream)) {
-  //         UpdateAudioStream(LibretroCore.audioStream, data, frames);
-  //     }
+size_t LibretroAudioWrite(int16_t *data, size_t frames) {
+  // if (data == NULL) {
+  //   return 0;
   // }
+  //  UpdateAudioStream(LibretroCore.audioStream, data, frames);
+
+  LibretroCore.audioBuffer = data;
+  LibretroCore.audioFrames = frames;
+
+  // TODO: Fix Audio being choppy since it doesn't append to the buffer.
+  // if (IsAudioStreamProcessed(LibretroCore.audioStream)) {
+  //  UpdateAudioStream(LibretroCore.audioStream, data, frames);
+  //}
+  //}
 
   return frames;
 }
@@ -1094,18 +1093,20 @@ void LibretroAudioSample(int16_t left, int16_t right) {
 }
 
 size_t LibretroAudioSampleBatch(const int16_t *data, size_t frames) {
-  return LibretroAudioWrite(data, frames);
+  LibretroCore.audioBuffer = data;
+  LibretroCore.audioFrames = frames;
+  return 0;
 }
 
 void LibretroInitAudio() {
   // Set the audio stream buffer size.
   int sampleSize = 32;
   int channels = 2;
+  unsigned int sampleRate = (LibretroCore.sampleRate);
 
   // Create the audio stream.
   // SetAudioStreamBufferSizeDefault(sampleSize);
-  LibretroCore.audioStream = LoadAudioStream(
-      (unsigned int)LibretroCore.sampleRate, sampleSize, channels);
+  LibretroCore.audioStream = LoadAudioStream(sampleRate, sampleSize, channels);
 
   SetAudioStreamCallback(LibretroCore.audioStream, LibretroAudioCallback);
   PlayAudioStream(LibretroCore.audioStream);
@@ -1115,8 +1116,8 @@ void LibretroInitAudio() {
     LibretroCore.audio_callback.set_state(true);
   }
 
-  TraceLog(LOG_INFO, "LIBRETRO: Audio stream initialized (%i Hz, %i bit)",
-           sampleSize, (int)LibretroCore.sampleRate);
+  TraceLog(LOG_INFO, "LIBRETRO: Audio stream initialized (%d Hz, %i bit)",
+           sampleRate, sampleSize);
 }
 
 bool LibretroInitAudioVideo() {
@@ -1364,7 +1365,9 @@ bool IsLibretroGameReady() {
  * Retrieve whether or not the game has been loaded.
  */
 void ResetLibretro() {
-  if (IsLibretroReady() && LibretroCore.retro_reset) {
+  if (LibretroCore.retro_reset) {
+    LibretroCore.retro_reset();
+    LibretroCore.retro_reset();
     LibretroCore.retro_reset();
   }
 }

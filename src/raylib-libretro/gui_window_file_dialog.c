@@ -1,5 +1,6 @@
 #include "gui_window_file_dialog.h"
 
+#include <stdlib.h>
 #include <string.h> // Required for: strcpy()
 
 //----------------------------------------------------------------------------------

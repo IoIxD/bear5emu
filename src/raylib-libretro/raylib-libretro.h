@@ -160,6 +160,7 @@ typedef struct rLibretro {
   AudioStream audioStream;
   int16_t *audioBuffer;
   size_t audioFrames;
+  int audioBufferPos;
 } rLibretro;
 
 rLibretro *GetLibretroCore();
@@ -180,7 +181,7 @@ bool IsLibretroReady();
 bool LibretroShouldClose();
 void LibretroInputPoll();
 void LibretroAudioCallback(void *bufferData, unsigned int frames);
-size_t LibretroAudioWrite(const int16_t *data, size_t frames);
+size_t LibretroAudioWrite(int16_t *data, size_t frames);
 void LibretroAudioSample(int16_t left, int16_t right);
 size_t LibretroAudioSampleBatch(const int16_t *data, size_t frames);
 void LibretroInitAudio();

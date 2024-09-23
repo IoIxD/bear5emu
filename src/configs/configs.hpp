@@ -38,6 +38,11 @@ public:
     */
   virtual float Speed() = 0;
 
+  /**
+    Return whether to play overworld music or not.
+  */
+  virtual bool Music() = 0;
+
   virtual ~GameConfig() {};
 };
 
@@ -50,5 +55,6 @@ public:
   bool Bear5AttackOverride() override;
   int Level() override;
   float Speed() override;
+  bool Music() override;
 };
 } // namespace configs

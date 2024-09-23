@@ -16,8 +16,19 @@ typedef enum Bear5State {
 Bear5State bearState = BEAR_5_IS_GONE;
 int bear5Timer = 0;
 int killTimer = 0;
+bool overworldMusicPlayed = false;
 
-int cur_level = 0;
+int cur_level = -1;
+
+void BackToMenu() {
+  ResetLibretro();
+  killTimer = 0;
+  bear5Timer = 0;
+  cur_level = -1;
+  bearState = BEAR_5_IS_COMING;
+  Bear5.x = 0.0;
+  Bear5.y = 0.0;
+}
 
 int main(int argc, char *argv[]) {
   // Ensure proper amount of arguments.
@@ -28,10 +39,16 @@ int main(int argc, char *argv[]) {
   InitWindow(512, 448, "raylib-libretro");
   SetWindowMinSize(400, 300);
   InitAudioDevice();
+  auto mainMusic = LoadMusicStream("music/1-1.mp3");
+  auto simpsons = LoadMusicStream("music/simpsons.wav");
 
   // Load the shaders and the menu.
   InitMenu();
+#ifdef _WIN32
+  InitLibretro("./libraries/fceumm.dll");
+#else
   InitLibretro("./libraries/fceumm.so");
+#endif
 
   SetTargetFPS(60);
 
@@ -42,13 +59,25 @@ int main(int argc, char *argv[]) {
   Texture j3 = InitJumpscare3();
   Texture j4 = InitJumpscare4();
 
-  float dx, dx_;
-
   configs::GameConfig *config = new configs::SMB1Config();
   while (!WindowShouldClose()) {
     if (!IsLibretroReady()) {
       continue;
     }
+
+    if (bearState == BEAR_5_IS_GONE) {
+      if (config->Music()) {
+        if (!overworldMusicPlayed) {
+          PlayMusicStream(mainMusic);
+          overworldMusicPlayed = true;
+        } else {
+          UpdateMusicStream(mainMusic);
+        }
+      }
+    } else {
+      UpdateMusicStream(simpsons);
+    }
+
     auto pos = config->MarioPos();
     auto spos = config->MarioScreenPos();
 
@@ -60,18 +89,19 @@ int main(int argc, char *argv[]) {
     if (config->Bear5AttackOverride()) {
       bearState = BEAR_5_KILLED_YOU;
     }
-    printf("Level %d, %0.2f %0.2f\n", config->Level(), x, y);
     // Release Bear 5 if the player reaches the appropriate part of the level.
     if (config->Level() == 0) {
       if (x >= 1650.0 && x <= 3450.0 && bearState == BEAR_5_IS_GONE) {
         bearState = BEAR_5_WILL_COME;
       }
+    } else if (config->Level() <= 64 && bearState == BEAR_5_IS_GONE) {
+      bearState = BEAR_5_WILL_COME;
     }
 
     // Reset Bear 5 if the level changes
     if (cur_level != config->Level()) {
-      Bear5.x = -1000.0;
-      Bear5.y = -1000.0;
+      Bear5.x = -250.0;
+      Bear5.y = -250.0;
       cur_level = config->Level();
     }
 
@@ -80,55 +110,60 @@ int main(int argc, char *argv[]) {
       UpdateLibretro();
     }
 
-    // Check if the core asks to be shutdown.
-    if (LibretroShouldClose()) {
-      UnloadLibretroGame();
-      CloseLibretro();
-    }
-
     // Render the libretro core.
     BeginDrawing();
     {
       ClearBackground(BLACK);
 
       UpdateMenu();
+
       DrawLibretro();
+
       if (bearState == BEAR_5_WILL_COME) {
+        StopMusicStream(mainMusic);
         DrawText("BEAR 5 IS COMING",
                  GetScreenWidth() / 2 -
                      (MeasureText("BEAR 5 IS COMING", 30) / 2),
                  GetScreenHeight() / 2, 30, RED);
         bear5Timer += 1;
-        Bear5.x = x - 384.0;
-        Bear5.y = y - 384.0;
+        Bear5.x = x - 250.0;
+        Bear5.y = y - 250.0;
         if (bear5Timer >= 240) {
           bearState = BEAR_5_IS_COMING;
         }
       }
 
-      dx = (Bear5.x - x);
+      float screen_x = (Bear5.x - x);
 
       int offset = (float)(GetScreenWidth()) *
                    (((float)sx / (float)GetScreenWidth()) * 2.0);
 
-      float dy = (float)(Bear5.y * 2) - 16;
-      if (bearState == BEAR_5_IS_COMING && config->Bear5CanAttack()) {
-        DrawTexturePro(Bear5Texture,
-                       (Rectangle){0, 0, BEAR5_WIDTH, BEAR5_HEIGHT},
-                       (Rectangle){dx + offset - 16, dy, 64, 64}, Vector2Zero(),
-                       0.0, WHITE);
+      float screen_y = (float)(Bear5.y * 2) - 16;
+      if (bearState == BEAR_5_IS_COMING) {
+        PlayMusicStream(simpsons);
+        if (config->Bear5CanAttack()) {
+          DrawTexturePro(Bear5Texture,
+                         (Rectangle){0, 0, BEAR5_WIDTH, BEAR5_HEIGHT},
+                         (Rectangle){screen_x + offset - 16, screen_y, 64, 64},
+                         Vector2Zero(), 0.0, WHITE);
 
-        int b_dx = (ceil(dx + offset));
-        int p_dx = (sx * 2);
-        int b_dy = ceil(dy / 2.0);
-        int p_dy = (sy - 6);
-        if ((b_dx >= p_dx - 3 && b_dx <= p_dx + 3) &&
-            (b_dy >= p_dy - 3 && b_dy <= p_dy + 3)) {
-          if (config->LevelEnding()) {
-            Bear5.x = -100.0;
-            Bear5.y = -100.0;
-          } else {
-            bearState = BEAR_5_KILLED_YOU;
+          int bear_screen_x = (ceil(screen_x + offset));
+          int player_screen_x = (sx * 2);
+          int bear_screen_y = ceil(screen_y / 2.0);
+          int player_screen_y = (sy - 6);
+
+          if (bear_screen_x >= 5 && bear_screen_y >= 5) {
+            if ((bear_screen_x >= player_screen_x - 3 &&
+                 bear_screen_x <= player_screen_x + 3) &&
+                (bear_screen_y >= player_screen_y - 3 &&
+                 bear_screen_y <= player_screen_y + 3)) {
+              if (config->LevelEnding()) {
+                Bear5.x = -250.0;
+                Bear5.y = -250.0;
+              } else {
+                bearState = BEAR_5_KILLED_YOU;
+              }
+            }
           }
         }
       }
@@ -177,7 +212,7 @@ int main(int argc, char *argv[]) {
                        0.0, WHITE);
       };
       if (killTimer >= 400) {
-        exit(0);
+        BackToMenu();
       };
     }
 
@@ -187,10 +222,18 @@ int main(int argc, char *argv[]) {
     if (IsKeyReleased(KEY_F11)) {
       ToggleFullscreen();
     }
+
+    // Check if the core asks to be shutdown.
+    if (LibretroShouldClose()) {
+      UnloadLibretroGame();
+      CloseLibretro();
+    }
+
+    if (IsKeyReleased(KEY_Q)) {
+      BackToMenu();
+    }
   }
 
-  // Unload the game and close the core.
-  UnloadLibretroGame();
   CloseLibretro();
 
   CloseAudioDevice();
